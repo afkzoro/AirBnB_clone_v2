@@ -86,7 +86,7 @@ class HBNBCommand(cmd.Cmd):
             if not arg:
                 raise SyntaxError()
             list_arg = arg.split(" ")
-            
+
             kwargs = {}
             for i in range(1, len(list_arg)):
                 key, value = tuple(list_arg[i].split("="))
@@ -98,7 +98,7 @@ class HBNBCommand(cmd.Cmd):
                     except (SyntaxError, NameError):
                         continue
                 kwargs[key] = value
-                
+
             if kwargs == {}:
                 obj = eval(list_arg[0])()
             else:
@@ -106,7 +106,7 @@ class HBNBCommand(cmd.Cmd):
                 storage.new(obj)
             print(obj.id)
             obj.save()
-        
+
         except SyntaxError:
             print("** class name missing **")
         except NameError:
@@ -144,19 +144,24 @@ class HBNBCommand(cmd.Cmd):
             del objdict["{}.{}".format(arg1[0], arg1[1])]
             storage.save()
 
-    def do_all(self, arg):
-        "Prints string representation of instances"
-        arg1 = parse(arg)
-        if len(arg1) > 0 and arg1[0] not in HBNBCommand.__classes:
+    def do_all(self, line):
+        """Usage: all or all <class> or <class>.all()
+        Display string representations of all instances of a given class.
+        If no class is specified, displays all instantiated objects."""
+        if not line:
+            o = storage.all()
+            print([o[k].__str__() for k in o])
+            return
+        try:
+            args = line.split(" ")
+            if args[0] not in self.__classes:
+                raise NameError()
+
+            o = storage.all(eval(args[0]))
+            print([o[k].__str__() for k in o])
+
+        except NameError:
             print("** class doesn't exist **")
-        else:
-            obj1 = []
-            for obj in storage.all().values():
-                if len(arg1) > 0 and arg1[0] == obj.__class__.__name__:
-                    obj1.append(obj.__str__())
-                elif len(arg1) == 0:
-                    obj1.append(obj.__str__())
-            print(obj1)
 
     def do_count(self, arg):
         """Usage: count <class> or <class>.count()
